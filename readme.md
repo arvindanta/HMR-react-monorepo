@@ -1,4 +1,4 @@
-# POC to enable HMR in monorepo across packages in dev mode
+# POC to enable HMR in monorepo across packages in Dev mode
 
 1. Components from react-16 package gets used in react-18 package.
 2. In Dev mode, any change in the components of react-16 will immediately reflect in react-18 as HMR.
