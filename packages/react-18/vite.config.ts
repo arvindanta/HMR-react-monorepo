@@ -10,9 +10,9 @@ const isDev = process.env.NODE_ENV === "development";
 export default defineConfig({
   resolve: {
     alias: {
-     "@lib": resolve(__dirname, "./lib"),
+    // "@lib": resolve(__dirname, "./lib"),
       // do this in dev mode to avoid the need to build the package
-   //   ...(isDev && { "react-16-app": resolve(__dirname, "../react-16/lib") }), // Use source in dev mode
+      ...(isDev && { "react-16-app": resolve(__dirname, "../react-16/lib") }), // Use source in dev mode
     },
   },
   plugins: [
