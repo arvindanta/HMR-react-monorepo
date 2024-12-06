@@ -21,3 +21,4 @@ jobs:
           OPENAI.KEY: ${{ secrets.OPENAI_KEY }}
           OPENAI.API_VERSION: ${{ secrets.OPENAI_API_VERSION }}
           OPENAI.DEPLOYMENT_ID: ${{ secrets.OPENAI_DEPLOYMENT_ID }}
+          OPENAI.API_TYPE: 'azure'
