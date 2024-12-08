@@ -2,6 +2,7 @@ on:
   pull_request:
     types: [opened, reopened, ready_for_review]
   issue_comment:
+    types: [created, edited]
 jobs:
   pr_agent_job:
     if: ${{ github.event.sender.type != 'Bot' }}
@@ -25,8 +26,8 @@ jobs:
           github_action_config.auto_review: "true" # enable\disable auto review
           github_action_config.auto_describe: "true" # enable\disable auto describe
           github_action_config.auto_improve: "true" # enable\disable auto improve
-          github_action_config.pr_actions: ["opened", "reopened", "ready_for_review", "review_requested"]
-          github_action_config.comment_actions: ["created", "edited"]
+          github_action_config.pr_actions: "opened", "reopened", "ready_for_review", "review_requested"
+          github_action_config.comment_actions: "created", "edited"
           pr_description.publish_labels: "false"
           pr_reviewer.inline_code_comments: "true"
           pr_description.publish_description_as_comment: "true"
