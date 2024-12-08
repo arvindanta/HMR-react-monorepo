@@ -32,6 +32,6 @@ jobs:
           pr_description.publish_description_as_comment: "true"
           pr_description.publish_description_as_comment_persistent: "true"
           pr_reviewer.inline_code_comments: "true"
-          pr_reviewer.enable_review_labels_effort	: "true"
+          pr_reviewer.enable_review_labels_effort	: "false"
           pr_code_suggestions.num_code_suggestions_per_chunk: "6"
           pr_code_suggestions.commitable_code_suggestions: "true"
