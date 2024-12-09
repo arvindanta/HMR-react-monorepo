@@ -1,41 +1,82 @@
+name: PR Review and Comment Agent
+
 on:
   pull_request:
     types: [opened, reopened, ready_for_review]
   issue_comment:
     types: [created, edited]
-    if: (
-      (github.event.sender.type != 'Bot') &&
-      (github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'Dont Review')) &&
-      (
-      (contains(github.event.pull_request.title, '[Review]') && github.event_name != 'issue_comment') ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/review')) ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/describe')) ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/improve')) ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/ask'))
-      ))
+
 jobs:
-  pr_agent_job:
-    if: (
-      (github.event.sender.type != 'Bot') &&
-      (github.event.pull_request.draft == false && !contains(github.event.pull_request.labels.*.name, 'Dont Review')) &&
-      (
-      (contains(github.event.pull_request.title, '[Review]') && github.event_name != 'issue_comment') ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/review')) ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/describe')) ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/improve')) ||
-      (github.event.issue.pull_request && contains(github.event.comment.body, '/ask'))
-      ))
+  pr_review_agent_job:
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
       contents: write
-    name: Run pr review agent on every pull request, respond to user comments
+    name: Run PR Review Agent on PRs and Comments
+
     steps:
-      - name: Labels
-        run: echo "${{ toJson(github.event.pull_request.labels) }}"
-      - name: PR Agent action step
-        id: pragent
+      # Step 1: Ensure the sender is not a bot
+      - name: Check Sender
+        if: ${{ github.event.sender.type == 'Bot' }}
+        run: |
+          echo "Action triggered by a bot. Exiting."
+          exit 0
+
+      # Step 2: Pre-check for pull_request events
+      - name: Pre-check for pull_request Event
+        if: ${{ github.event_name == 'pull_request' }}
+        id: pre_check_pull_request
+        run: |
+          echo "Checking conditions for pull_request event."
+          if [[ "${{ github.event.pull_request.draft }}" == "true" ]]; then
+            echo "Pull request is a draft. Exiting."
+            exit 0
+          fi
+
+          LABELS=$(jq -r .labels[].name <<< "${{ toJson(github.event.pull_request.labels) }}")
+          echo "Labels: $LABELS"
+
+          if echo "$LABELS" | grep -q "Dont Review"; then
+            echo "Label 'Dont Review' found. Exiting."
+            exit 0
+          fi
+
+          TITLE="${{ github.event.pull_request.title }}"
+          if ! echo "$TITLE" | grep -q "\[Review\]"; then
+            echo "Pull request title does not contain '[Review]'. Exiting."
+            exit 0
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 3: Pre-check for issue_comment events
+      - name: Pre-check for issue_comment Event
+        if: ${{ github.event_name == 'issue_comment' }}
+        id: pre_check_issue_comment
+        run: |
+          echo "Checking conditions for issue_comment event."
+          PR_NUMBER=$(jq -r .issue.number <<< "${{ toJson(github.event) }}")
+          echo "Fetching labels for PR #$PR_NUMBER"
+          LABELS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/labels" | jq -r '.[].name')
+          echo "Labels: $LABELS"
+
+          if echo "$LABELS" | grep -q "Dont Review"; then
+            echo "Label 'Dont Review' found. Exiting."
+            exit 0
+          fi
+
+          COMMENT_BODY="${{ github.event.comment.body }}"
+          if ! echo "$COMMENT_BODY" | grep -E "/review|/describe|/improve|/ask" > /dev/null; then
+            echo "No relevant comment command found. Exiting."
+            exit 0
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Step 4: Run PR Agent
+      - name: Run PR Agent action step
         uses: arvindanta/pr-agent@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,9 +85,9 @@ jobs:
           OPENAI.API_VERSION: ${{ secrets.OPENAI_API_VERSION }}
           OPENAI.DEPLOYMENT_ID: ${{ secrets.OPENAI_DEPLOYMENT_ID }}
           OPENAI.API_TYPE: "azure"
-          github_action_config.auto_review: "true" # enable\disable auto review
-          github_action_config.auto_describe: "true" # enable\disable auto describe
-          github_action_config.auto_improve: "true" # enable\disable auto improve
+          github_action_config.auto_review: "true"
+          github_action_config.auto_describe: "true"
+          github_action_config.auto_improve: "true"
           github_action_config.pr_actions: "opened,reopened,ready_for_review,review_requested"
           github_action_config.comment_actions: "created,edited"
           pr_description.publish_labels: "false"
