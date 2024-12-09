@@ -32,6 +32,8 @@ jobs:
       contents: write
     name: Run pr review agent on every pull request, respond to user comments
     steps:
+      - name: Labels
+        uses: echo "${{ github.event.pull_request.labels.*.name }}"
       - name: PR Agent action step
         id: pragent
         uses: arvindanta/pr-agent@main
