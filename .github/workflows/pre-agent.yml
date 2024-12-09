@@ -27,7 +27,7 @@ jobs:
         id: fetch_labels
         run: |
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels" | jq -r '.[].name' > labels.txt
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels" | jq -r '.[].name' > labels.txt
           if grep -q "Dont Review" labels.txt; then
             echo "contains_dont_review=true" >> $GITHUB_ENV
           else
