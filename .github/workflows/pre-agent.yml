@@ -33,7 +33,7 @@ jobs:
     name: Run pr review agent on every pull request, respond to user comments
     steps:
       - name: Labels
-        run: echo "${{ github.event.pull_request.labels.*.name }}"
+        run: echo "${{ toJson(github.event.pull_request.labels) }}"
       - name: PR Agent action step
         id: pragent
         uses: arvindanta/pr-agent@main
