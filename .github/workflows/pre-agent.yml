@@ -33,7 +33,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: PR Agent action step
         id: pragent
-        if: (!steps.fetch_labels.outputs.labels.includes('Dont Review'))
+        if: (
+          !steps.fetch_labels.outputs.labels.includes('Dont Review')
+          )
         uses: arvindanta/pr-agent@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
