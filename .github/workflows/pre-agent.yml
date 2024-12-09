@@ -52,7 +52,7 @@ jobs:
           github_action_config.pr_actions: "opened,reopened,ready_for_review,review_requested"
           github_action_config.comment_actions: "created,edited"
           pr_description.publish_labels: "false"
-          pr_description.publish_description_as_comment: "true"
+          pr_description.publish_description_as_comment: "false"
           pr_description.publish_description_as_comment_persistent: "true"
           pr_description.enable_help_text: "false"
           pr_reviewer.num_code_suggestions: "6"
