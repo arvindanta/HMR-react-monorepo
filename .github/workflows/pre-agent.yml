@@ -28,14 +28,16 @@ jobs:
         run: |
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/labels" | jq -r '.[].name' > labels.txt
-          echo "Labels: $(cat labels.txt)"
+          if grep -q "Dont Review" labels.txt; then
+            echo "contains_dont_review=true" >> $GITHUB_ENV
+          else
+            echo "contains_dont_review=false" >> $GITHUB_ENV
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: PR Agent action step
         id: pragent
-        if: (
-          !steps.fetch_labels.outputs.labels.includes('Dont Review')
-          )
+        if: env.contains_dont_review == 'false'
         uses: arvindanta/pr-agent@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
