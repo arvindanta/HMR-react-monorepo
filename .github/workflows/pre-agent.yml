@@ -6,12 +6,16 @@ on:
 jobs:
   pr_agent_job:
     if: ${{ github.event.sender.type != 'Bot' }}
+    if:
+    ( (github.event.pull_request.draft == false && !contains(github.event.*.labels.*.name, 'Don't Review')) &&
+    ( (contains(github.event.pull_request.title,'[Review]') && github.event_name != 'issue_comment') || (github.event.issue.pull_request && contains(github.event.comment.body, '/code-review')) )
+    )
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
       contents: write
-    name: Run pr agent on every pull request, respond to user comments
+    name: Run pr review agent on every pull request, respond to user comments
     steps:
       - name: PR Agent action step
         id: pragent
