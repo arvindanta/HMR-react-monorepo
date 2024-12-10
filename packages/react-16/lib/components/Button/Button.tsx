@@ -1,5 +1,5 @@
 function Button({ onClick }: { onClick: () => void }): JSX.Element {
-  return <button onClick={onClick}> HMasdasdasdasdR react 16 </button>;
+  return <button onClick={onClick}> Click Me ok</button>;
 }
 
 export { Button };
